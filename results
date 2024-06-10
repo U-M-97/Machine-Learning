@@ -1,0 +1,29 @@
+10000 iterations results
+
+Iteration 0, Loss: 1.0713268519326824
+Iteration 1000, Loss: 0.0886031970102806
+Iteration 2000, Loss: 0.06709376637618385
+Iteration 3000, Loss: 0.060057942231552204
+Iteration 4000, Loss: 0.051370922820008144
+Iteration 5000, Loss: 0.045759345780079334
+Iteration 6000, Loss: 0.042244399946504925
+Iteration 7000, Loss: 0.03944075444547711
+Iteration 8000, Loss: 0.04034096661035092
+Iteration 9000, Loss: 0.3850356200093128
+total time to train model 3024.115919828415 seconds
+0.8375714285714285
+
+5000 iterations results
+
+Iteration 0, Loss: 1.294349697832599
+Iteration 1000, Loss: 0.08762173614363444
+Iteration 2000, Loss: 0.06835291774051763
+Iteration 3000, Loss: 0.060456449211399664
+Iteration 4000, Loss: 0.05408402886682303
+total time to train model 1645.4844543933868 seconds
+0.9492857142857143
+
+learning_rate = 0.01
+iterations = 20000
+total time to train model 6158.45543885231 seconds
+Accuracy = 92.29285714285714 %
