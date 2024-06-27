@@ -74,7 +74,7 @@ def update_parameters(w1, b1, w2, b2, w3, b3, dw1, db1, dw2, db2, dw3, db3, lear
 
 def train(x, y, input_layer_size, hidden_layer_size_1, hidden_layer_size_2, output_layer_size, learning_rate, iterations):
     w1, b1, w2, b2, w3, b3 = initialize_parameters(input_layer_size, hidden_layer_size_1, hidden_layer_size_2, output_layer_size)
-
+    
     for i in range(iterations):
         z1, a1, z2, a2, z3, a3 = forward_propagation(x, w1, b1, w2, b2, w3, b3)
         loss_value = loss(y, a3)
@@ -108,32 +108,46 @@ def main():
     learning_rate = 0.01
     iterations = 20000
 
-    start = time.time()
-    w1, b1, w2, b2, w3, b3 = train(x_train, y_train, input_layer_size, hidden_layer_size_1, hidden_layer_size_2, output_layer_size, learning_rate, iterations)
-    end = time.time()
-    print("total time to train model", end - start, "seconds")
-    np.savez("mnist_params.npz", w1=w1, b1=b1, w2=w2, b2=b2, w3=w3, b3=b3)
+    # start = time.time()
+    # w1, b1, w2, b2, w3, b3 = train(x_train, y_train, input_layer_size, hidden_layer_size_1, hidden_layer_size_2, output_layer_size, learning_rate, iterations)
+    # end = time.time()
+    # print("total time to train model", end - start, "seconds")
+    # np.savez("mnist_params.npz", w1=w1, b1=b1, w2=w2, b2=b2, w3=w3, b3=b3)
 
-    _, _, _, _, _, y_predict = forward_propagation(x_test, w1, b1, w2, b2, w3, b3)
-    accuracy = np.mean(np.argmax(y_predict.T, axis=1) == np.argmax(y_test, axis=1)) * 100
-    print("Accuracy = ", accuracy, " % ")
+    # params = np.load('mnist_params.npz')
+    # _, _, _, _, _, y_predict = forward_propagation(x_test[3000].reshape(1, -1), params['w1'], params['b1'], params['w2'], params['b2'], params['w3'], params['b3'])
+    # print(np.argmax(y_predict))
+    # plt.figure(figsize=(10, 5))
 
-    img = cv2.imread("images/7.jpg", cv2.IMREAD_GRAYSCALE)
-    plt.imshow(img, cmap='gray')
-    plt.axis('off') 
-    plt.show()
-    img = cv2.resize(img, (28, 28))
-    plt.imshow(img, cmap='gray')
-    plt.axis('off')  
-    plt.show()
-    img = img.flatten()
-    img = np.array(img, dtype='float32')
-    img /= 255.0
-    img = img.reshape(1, -1)
+    # plt.subplot(1, 2, 1)
+    # plt.imshow(x_test[3000].reshape(28, 28), cmap='gray')
+    # plt.title('Real Image')
 
-    params = np.load('mnist_params.npz')
-    _, _, _, _, _, y_predict = forward_propagation(img, params['w1'], params['b1'], params['w2'], params['b2'], params['w3'], params['b3'])
-    print(y_predict)
-    print(np.argmax(y_predict))
+    # plt.subplot(1, 2, 2)
+    # plt.text(0.5, 0.5, str(np.argmax(y_predict)), fontsize=120, ha='center')
+    # plt.title('Predicted Number')
+    # plt.axis('off')
+
+    # plt.tight_layout()
+    # plt.show()
+    # accuracy = np.mean(np.argmax(y_predict.T, axis=1) == np.argmax(y_test, axis=1)) * 100
+    # print("Accuracy = ", accuracy, " % ")
+
+    # img = cv2.imread("images/7.jpg", cv2.IMREAD_GRAYSCALE)
+    # plt.imshow(img, cmap='gray')
+    # plt.axis('off') 
+    # plt.show()
+    # img = cv2.resize(img, (28, 28))
+    # plt.imshow(img, cmap='gray')
+    # plt.axis('off')  
+    # plt.show()
+    # img = img.flatten()
+    # img = np.array(img, dtype='float32')
+    # img /= 255.0
+    # img = img.reshape(1, -1)
+
+    # _, _, _, _, _, y_predict = forward_propagation(img, params['w1'], params['b1'], params['w2'], params['b2'], params['w3'], params['b3'])
+    # print(y_predict)
+    # print(np.argmax(y_predict))
    
 main()
