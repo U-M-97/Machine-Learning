@@ -1,5 +1,8 @@
 #output size formula = (((w - k) + 2p) / s) + 1
 import numpy as np
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+import time
 
 def conv(input_matrix, kernel, stride, padding):
     input_height, input_width = input_matrix.shape
@@ -197,8 +200,8 @@ def forward_propagation(input_matrix, conv1_params, kernels_layer_1, biases_laye
     return act_output, act_fully_connected_layer2_out, fully_connected_layer2_out, act_fully_connected_layer1_out, fully_connected_layer1_out, flattened_out, pooled_outs2, feature_activation_maps_layer_2, pooled_outs2_indices, feature_maps_layer_2, pooled_outs, feature_activation_maps_layer1, pooled_outs_indices, feature_maps_layer_1
 
 def crossEntropyLoss(output, y):
-    m = y.shape[0]
-    log_probs = -np.log(output[np.arange(m), y.argmax(axis=1)])
+    m = 1
+    log_probs = -np.log(output[np.arange(m), y.argmax()])
     loss_value = np.sum(log_probs) / m
     return loss_value
 
@@ -216,7 +219,7 @@ def update_parameters(learning_rate, w3, dl_dw3, b3, dl_db3, w2, dl_dw2, b2, dl_
 
     return w3, b3, w2, b2, w1, b1, kernels_layer_2, biases_layer_2, kernels_layer_1, biases_layer_1
 
-def train(input_matrix, y, learning_rate, iterations, conv1_params, conv1_stride, conv1_padding, pool1_size, pool1_stride, pool1_padding, conv2_params, conv2_stride, conv2_padding, pool2_size, pool2_stride, pool2_padding, kernel_size, flatten_layer_size, fc1_neurons, fc2_neurons, output_layer):
+def train(x, y, learning_rate, iterations, conv1_params, conv1_stride, conv1_padding, pool1_size, pool1_stride, pool1_padding, conv2_params, conv2_stride, conv2_padding, pool2_size, pool2_stride, pool2_padding, kernel_size, flatten_layer_size, fc1_neurons, fc2_neurons, output_layer):
     kernels_layer_1, biases_layer_1 = initialize_kernels(conv1_params, 1, kernel_size)
     kernels_layer_2, biases_layer_2 = initialize_kernels(conv2_params, conv1_params, kernel_size)
     w1, b1 = initialize_params(flatten_layer_size, fc1_neurons)
@@ -224,14 +227,16 @@ def train(input_matrix, y, learning_rate, iterations, conv1_params, conv1_stride
     w3, b3 = initialize_params(fc2_neurons, output_layer)
 
     for itr in range(iterations):
-        act_output, act_fully_connected_layer2_out, fully_connected_layer2_out, act_fully_connected_layer1_out, fully_connected_layer1_out, flattened_out, pooled_outs2, feature_activation_maps_layer_2, pooled_outs2_indices, feature_maps_layer_2, pooled_outs, feature_activation_maps_layer1, pooled_outs_indices, feature_maps_layer_1 = forward_propagation(input_matrix, conv1_params, kernels_layer_1, biases_layer_1, conv1_stride, conv1_padding, pool1_size, pool1_stride, conv2_params, kernels_layer_2, biases_layer_2, conv2_stride, conv2_padding, pool2_size, pool2_stride, w1, b1, w2, b2, w3, b3)
-        loss_value = crossEntropyLoss(act_output, y)
-        dl_dk1, dl_db1_conv, dl_dk2, dl_db2_conv, dl_dw1, dl_db1, dl_dw2, dl_db2, dl_dw3, dl_db3 = backward_propagation(act_output, y, act_fully_connected_layer2_out, w3, fully_connected_layer2_out, act_fully_connected_layer1_out, w2, fully_connected_layer1_out, flattened_out, w1, b1, pooled_outs2.shape, np.array(feature_activation_maps_layer_2).shape, np.array(pooled_outs2_indices), pool2_size, pool2_stride, np.array(feature_maps_layer_2), np.array(pooled_outs), np.array(kernels_layer_2), np.array(feature_activation_maps_layer1).shape, pool1_size, pool1_stride, pooled_outs_indices, np.array(feature_maps_layer_1), input_matrix)
-        w3, b3, w2, b2, w1, b1, kernels_layer_2, biases_layer_2, kernels_layer_1, biases_layer_1 = update_parameters(learning_rate, w3, dl_dw3, b3, dl_db3, w2, dl_dw2, b2, dl_db2, w1, dl_dw1, b1, dl_db1, kernels_layer_2, dl_dk2, biases_layer_2, dl_db2_conv, kernels_layer_1, dl_dk1, biases_layer_1, dl_db1_conv)
+        total_loss = 0
+        for i in range(x.shape[0]):
+            print("iteration = ", itr, " image number = ", i)
+            act_output, act_fully_connected_layer2_out, fully_connected_layer2_out, act_fully_connected_layer1_out, fully_connected_layer1_out, flattened_out, pooled_outs2, feature_activation_maps_layer_2, pooled_outs2_indices, feature_maps_layer_2, pooled_outs, feature_activation_maps_layer1, pooled_outs_indices, feature_maps_layer_1 = forward_propagation(x[i], conv1_params, kernels_layer_1, biases_layer_1, conv1_stride, conv1_padding, pool1_size, pool1_stride, conv2_params, kernels_layer_2, biases_layer_2, conv2_stride, conv2_padding, pool2_size, pool2_stride, w1, b1, w2, b2, w3, b3)
+            total_loss += crossEntropyLoss(act_output, y[i])
+            dl_dk1, dl_db1_conv, dl_dk2, dl_db2_conv, dl_dw1, dl_db1, dl_dw2, dl_db2, dl_dw3, dl_db3 = backward_propagation(act_output, y[i], act_fully_connected_layer2_out, w3, fully_connected_layer2_out, act_fully_connected_layer1_out, w2, fully_connected_layer1_out, flattened_out, w1, b1, pooled_outs2.shape, np.array(feature_activation_maps_layer_2).shape, np.array(pooled_outs2_indices), pool2_size, pool2_stride, np.array(feature_maps_layer_2), np.array(pooled_outs), np.array(kernels_layer_2), np.array(feature_activation_maps_layer1).shape, pool1_size, pool1_stride, pooled_outs_indices, np.array(feature_maps_layer_1), x[i])
+            w3, b3, w2, b2, w1, b1, kernels_layer_2, biases_layer_2, kernels_layer_1, biases_layer_1 = update_parameters(learning_rate, w3, dl_dw3, b3, dl_db3, w2, dl_dw2, b2, dl_db2, w1, dl_dw1, b1, dl_db1, kernels_layer_2, dl_dk2, biases_layer_2, dl_db2_conv, kernels_layer_1, dl_dk1, biases_layer_1, dl_db1_conv)
 
-        if itr % 100 == 0:
-            print(f"Iteration {itr}, Loss: {loss_value}")
-            print(np.sum(w3))
+        if itr % 10 == 0:
+            print(f"Iteration {itr}, Loss: {total_loss / len(x)}")
 
     return kernels_layer_1, biases_layer_1, kernels_layer_2, biases_layer_2, w1, b1, w2, b2, w3, b3
 
@@ -239,18 +244,26 @@ def main():
     np.random.seed(0)
 
     # input_matrix = np.random.normal(loc=0.5, scale=0.25, size=(28, 28))
-    input_matrix = np.random.normal(loc=0.5, scale=0.25, size=(28, 28))
-    # Normalize the matrix
-    normalized_matrix = (input_matrix - np.min(input_matrix)) / (np.max(input_matrix) - np.min(input_matrix))
-    print(np.sum(normalized_matrix))
+    # # Normalize the matrix
+    # normalized_matrix = (input_matrix - np.min(input_matrix)) / (np.max(input_matrix) - np.min(input_matrix))
+    # print(np.sum(normalized_matrix))
+
+    mnist = fetch_openml('mnist_784', version=1)
+    x, y = mnist['data'], mnist['target']
+
+    x = np.array(x, dtype='float32')
+    y = np.array(y, dtype='int32')
+    x /= 255.0
 
     num_classes = 10
-    y = np.zeros(num_classes, dtype=int)
-    y[5] = 1
-    y = y.reshape(1, -1)
+    y_onehot = np.zeros((y.shape[0], num_classes))
+    for i in range(len(y)):
+        y_onehot[i, y[i]] = 1
     
+    x_train, x_test, y_train, y_test = train_test_split(x, y_onehot, test_size=0.2, random_state=42)
+
     learning_rate = 0.01
-    iterations = 20000
+    iterations = 100
     conv1_params = 32
     conv1_stride = 1
     conv1_padding = 0
@@ -268,12 +281,21 @@ def main():
     fc2_neurons = 100
     output_layer = num_classes
 
-    conv1_output_size = ((input_matrix.shape[0] - kernel_size + (2 * conv1_padding)) // conv1_stride) + 1
+    x_train = x_train.reshape(-1, 28, 28)
+    x_test = x_test.reshape(-1, 28, 28)
+
+    image_width = x_train.shape[1]
+    image_height = x_train.shape[2]
+    conv1_output_size = ((image_width - kernel_size + (2 * conv1_padding)) // conv1_stride) + 1
     conv1_pooled_size = ((conv1_output_size - pool1_size + (2 * pool1_padding)) // pool1_stride) + 1
     conv2_output_size = ((conv1_pooled_size - kernel_size + (2 * conv1_padding)) // conv1_stride) + 1
     conv2_pooled_size = ((conv2_output_size - pool2_size + (2 * pool1_padding)) // pool1_stride) + 1
     flatten_layer_size = conv2_params * conv2_pooled_size * conv2_pooled_size
 
-    kernels_layer_1, biases_layer_1, kernels_layer_2, biases_layer_2, w1, b1, w2, b2, w3, b3 = train(normalized_matrix, y, learning_rate, iterations, conv1_params, conv1_stride, conv1_padding, pool1_size, pool1_stride, pool1_padding, conv2_params, conv2_stride, conv2_padding, pool2_size, pool2_stride, pool2_padding, kernel_size, flatten_layer_size, fc1_neurons, fc2_neurons, output_layer)
+    start = time.time()
+    kernels_layer_1, biases_layer_1, kernels_layer_2, biases_layer_2, w1, b1, w2, b2, w3, b3 = train(x_train, y_train, learning_rate, iterations, conv1_params, conv1_stride, conv1_padding, pool1_size, pool1_stride, pool1_padding, conv2_params, conv2_stride, conv2_padding, pool2_size, pool2_stride, pool2_padding, kernel_size, flatten_layer_size, fc1_neurons, fc2_neurons, output_layer)
+    end = time.time()
+    print("total time to train model", end - start, "seconds")
+    print("total time to train model", (end - start) /  60, "minutes")
 
 main()
